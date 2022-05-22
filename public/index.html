@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- Uncomment if you want your page to NOT be indexed by search engines: -->
+  <!-- <meta name="robots" content="none"> -->
+  <link rel="stylesheet" href="style.css" />
+  <title>TODO: Your project title</title>
+
+  <!-- Uncomment if using d3: -->
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+
+<body>
+  <div id="heatmap"></div>
+</body>
+
+
+
+<script>
+
+  // set the dimensions and margins of the graph
+  const margin = { top: 30, right: 30, bottom: 50, left: 60 },
+    width = 600 - margin.left - margin.right,
+    height = 450 - margin.top - margin.bottom;
+
+
+
+
+  const frequency = [38000, 120000, 200000]
+
+  const depth_levels = new Array(37);
+  for (let i = 0; i < depth_levels.length; i++) {
+    depth_levels[i] = i;
+  }
+
+
+  const frequency_depth = new Array(111);
+  for (let i = 0; i < frequency_depth.length; i++) {
+    frequency_depth[i] = i;
+  }
+
+  const ping_time = new Array(144);
+  for (let i = 0; i < ping_time.length; i++) {
+    //ping_time[i] = 1 / 6 * i;
+    ping_time[i] = i;
+
+  }
+
+
+
+  const n_observation = 62;
+  const p_component_size = frequency.length * depth_levels.length * ping_time.length;
+  const frequency_depth_size = frequency.length * depth_levels.length;
+
+  // Create svg in page
+  const svg = d3.select("#heatmap")
+    .append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+    .attr("transform", `translate(${margin.left},${margin.top})`);
+
+  // Build X scales, axis, ticks, and labels:
+  const x = d3.scaleBand()
+    .range([0, width])
+    .domain(ping_time)
+    .padding(0.01);
+
+  var xtickValues = x
+    .domain()
+    .filter(function (d, i) { return !((i + 1) % Math.floor(x.domain().length / 10)); });
+
+  svg.append("g")
+    .attr("transform", `translate(0, ${height})`)
+    .call(d3.axisBottom(x).tickValues(xtickValues))
+
+  svg.append("text")
+    .attr("class", "x label")
+    .attr("text-anchor", "end")
+    .attr("x", width)
+    .attr("y", height + 30)
+    .text("Ping time");
+
+
+
+  // Build Y scales, axis, ticks, and labels:
+  const y = d3.scaleBand()
+    .range([0, height])
+    .domain(frequency_depth)
+    .padding(0.01);
+
+  var ytickValues = y
+    .domain()
+    // TODO: y-tick might need change
+    .filter(function (d, i) { return !((i + 1) % Math.floor(y.domain().length / 10)); });
+
+  svg.append("g")
+    .call(d3.axisLeft(y).tickValues(ytickValues));
+
+  svg.append("text")
+    .attr("class", "y label")
+    .attr("text-anchor", "start")
+    .attr("y", -50)
+    .attr("x", -150)
+    .attr("dy", ".75em")
+    .attr("font-size", 20)
+    .attr("transform", "rotate(-90)")
+    .text("depth*frequency");
+
+
+
+  // Build color scale
+  const myColor = d3.scaleLinear()
+    .range(["blue", "red"])
+    //.domain([-4.18e-01,5.81e-01])
+    .domain([-0.02, 0.02])
+
+
+
+  // plot data from csv (Using d3.text() to handle no header data)
+  // currently, only one component was shown in the heatmap.
+  //TODO: User should be able to select one or more components
+  d3.text("../W_PCA_data.csv")
+    .then(function (data) {
+      return data.split(",");
+    })
+    .then(function (data) {
+      // split data into 3d Array [62[111 [144]]]
+      const three_dim_array = new Array(62);
+      for (let i = 0, j = 0; i < data.length; i += p_component_size, j += 1) {
+        const chunk = new Array(frequency_depth_size);
+        const intermediate = data.slice(i, i + p_component_size);
+        for (let k = 0, l = 0; k < intermediate.length; k += ping_time.length, l += 1) {
+          chunk[l] = intermediate.slice(k, k + ping_time.length);
+        }
+        three_dim_array[j] = chunk;
+      }
+      // return the first principal component
+      return three_dim_array[0];
+    })
+    .then(function (data) {
+      // plot each column of data
+      for (let index = 0; index < data.length; index++) {
+        plot_column(data[index], index)
+      }
+    });
+
+
+
+  function plot_column(data, col_num) {
+    svg.selectAll()
+      .data(data)
+      .enter()
+      .append("rect")
+      .attr("x", function (d, i, j) { return x(i) })
+      .attr("y", function (d, i, j) { return y(col_num) })
+      .attr("width", x.bandwidth())
+      .attr("height", y.bandwidth())
+      .style("fill", function (d, i, j) { return myColor(d) })
+  }
+
+</script>
+
+</html>
