@@ -84,8 +84,7 @@
     .attr("y", height + 30)
     .text("Ping time");
 
-
-
+  
   // Build Y scales, axis, ticks, and labels:
   const y = d3.scaleBand()
     .range([0, height])
@@ -148,8 +147,8 @@
       }
     });
 
-
-
+  // plot of the explained variance
+  
   function plot_column(data, col_num) {
     svg.selectAll()
       .data(data)
@@ -161,6 +160,62 @@
       .attr("height", y.bandwidth())
       .style("fill", function (d, i, j) { return myColor(d) })
   }
+
+  // Adding the second plot: explained variance
+  var chart2 = d3.select("body")
+	.append("svg")
+		.attr("width", width + margin.left + margin.right)
+		.attr("height", height + margin.top + margin.bottom)
+	.append("g")
+		.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    
+  d3.csv("../explained_variance_data_x.csv")
+    .then(function (data) {
+      data.forEach(function(d) {
+      d.num = parseInt(d.num);
+      d.variance = parseFloat(d.variance)});
+      
+      // Set x and y axis
+      var	var_x = d3.scaleLinear().domain([0, d3.max(data, function(d) { return d.num; })]).range([0, width]);
+      var	var_y = d3.scaleLinear().domain([0, d3.max(data, function(d) { return d.variance; })]).range([height, 0]);
+      
+      chart2.append("g")
+      .attr("transform", "translate(0," + height + ")")
+      .call(d3.axisBottom(var_x));
+
+      chart2.append("g")
+      .call(d3.axisLeft(var_y));
+     // Add dots
+      chart2.append('g')
+        .selectAll("dot")
+        .data(data)
+        .enter()
+        .append("circle")
+          .attr("cx", function (d) { return var_x(d.num); } )
+          .attr("cy", function (d) { return var_y(d.variance); } )
+          .attr("r", 3.5)
+          .style("fill", "#69b3a2")
+
+      chart2.append("text")
+        .attr("class", "y label")
+        .attr("text-anchor", "start")
+        .attr("y", -50)
+        .attr("x", -150)
+        .attr("dy", ".75em")
+        .attr("font-size", 15)
+        .attr("transform", "rotate(-90)")
+        .text("% Variance Explained");
+
+      chart2.append("text")
+          .attr("class", "x label")
+          .attr("text-anchor", "end")
+          .attr("x", width)
+          .attr("y", height + 40)
+          .attr("font-size", 15)
+          .text("Component Number");
+        
+    });
 
 </script>
 
