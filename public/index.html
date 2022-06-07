@@ -7,215 +7,335 @@
   <!-- Uncomment if you want your page to NOT be indexed by search engines: -->
   <!-- <meta name="robots" content="none"> -->
   <link rel="stylesheet" href="style.css" />
-  <title>TODO: Your project title</title>
+  <title>Visualizing Principal Components of Sonar Data</title>
 
   <!-- Uncomment if using d3: -->
   <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-legend/2.25.6/d3-legend.min.js"></script>
+
+  <script src="variance_chart.js"></script>
+  <script src="retrieve_data.js"></script>
+  <script src="heatmap_chart.js"></script>
+
 </head>
 
-<body>
-  <div id="heatmap"></div>
+<body id="whole-setup">
+
+  <h1>PCA: Low Rank Approximation of Ocean Sonar Dataset with Selected Principal Components
+  </h1>
+  <p style="text-indent: 40px">This echogram depicts noise-reduced echosounder water column data collected over 62 days. The color depicts the volume backscattering strength averaged over each 10 minute time period of the day (these averaged values are called the "mean backscattering strength" or MVBS). There is a MVBS for each 10 minute period of each day, at each depth and in each frequency over the 62 days. An increase in MVBS indicates the presence of objects (<a href='https://www.annualreviews.org/doi/abs/10.1146/annurev-marine-122414-034001'>frequently organisms</a>) in the water column. These data can tell us about the movement of organisms through the water column over time. However, it can be challenging to identify daily patterns in a dataset this large.</p>
+ <br>
+  <div id="ds-rpca"></div>
+  <p style="text-indent: 40px">Principal component analysis is a technique that identifies orthagonal vectors through a dataset that capture the most of that data's variance. We can visualize principal components in isolation to identify patterns in the data and we can combine principal components (by summing them after scaling them to their eigenvalues or singular values) to construct low-rank approximations of the dataset. This can help identify which patterns are contributing to which elements in the full dataset and can be used to reduce the storage size of the dataset (by eliminating the contributions of principal components that capture very little variance).</p>
+  <p style="text-indent: 40px">Below we have run principal component analysis on the data with the data matrix reshaped so that the data collected each day is its own column (the matrix visualized above has one column per ten minute time bin, our reshaped data matrix stacked all ten minute data points for each day so each column contains all the data for one day). Thus the principal components capture patterns of what happens in the water column over the course of one day. The scatter plot depicts the amount of variance captured by each principal component.</p> 
+  <p style="text-indent: 40px">Select a principal component by clicking a point to see it visualized in the echogram on the left. The echogram on the right will depict a low-rank approximation of the data using the unselected principal components to show what data are missing from the visualization on the left. Select multiple principal components to see a low-rank approximation of the data using all selected principal components and a low rank approximation using unselected principal components for comparison.</p>
+  <p style="text-indent: 40px">Click the "Select All" button to select all principal components and see the full dataset visualized in the echogram on the left. From there you can click points to deselect them and see what patterns are removed from the overall data when you remove the contributions from specific principal components. Click the "Clear All" button to deselct all principal components. Explore data from all three frequencies in the dataset!</p>
+  <br>
+  <h3>Select principal components to view the low rank approximation
+  </h3>
+  <br>
+  <br>
+  <div id="container">
+    <div id="top-row">
+      <div id="variance_chart"></div>
+      <div id = "all_selection_options">
+        <div>
+          <br> Press here to select all:
+          <br>
+          <!-- <button type="button" onclick="selectall()">Select All</button> -->
+          <button type="button">Select All</button>
+        </div>
+        <div>
+          <br> Press here to deselect all:
+          <br>
+          <button type="button">Clear All</button>
+        </div>
+        <div>
+          <br> Select your preferred
+          frequency from the drop-down list:
+          <br>
+        </div>
+        <form>
+          <select class="freq_dropdown" name="freq_dropdown">
+            <option value="38">38khz</option>
+            <option value="120">120khz</option>
+            <option value="200">200khz</option>
+          </select>
+        </form>
+      </div>
+
+  </div>
+
+   <br><br>
+   <h3>Daily Echograms
+  </h3>
+  <br>
+<br>
+    <div id="heatmap"></div>
+  </div>
+
+  <div>
+    <main>
+      <p>Try selecting principal components that capture very little variance. How do the low-rank approximations capturing little variance compare to low-rank approximations capturing lots of variance?</p>
+      <br>
+      <p style="text-indent: 40px">This tool is designed to help oceanography students understand the function and value of principal component analysis. Oceanography students may be familiar with daily patterns in the water column. Here students can see how principal component analysis extracts daily patterns and how principal components can be used to create a low-rank approximation of echosounder wave column data. Oceanographers may also be interested in using the tool to explore daily patterns in the three different frequencies in this dataset.</p>
+      <p style="text-indent: 40px">These data were provided to us by <a href="https://github.com/leewujung">Wu-Jung Lee</a> and <a href="https://escience.washington.edu/people/valentina-staneva/">Valentina Staneva</a>, were published in The Journal of the Acoustical Society of America in their 2020 paper <a href="https://arxiv.org/abs/2007.02906">“Compact Representation of Temporal Processes in Echosounder Time Series via Matrix Decomposition.”</a> and can be found in <a href="https://github.com/leewujung/ooi-echo-matrix-decomposition">this repo</a>. </p> 
+     <br>
+    <p>Thanks to <a href="https://github.com/leewujung">Wu-Jung Lee</a> and <a href="https://escience.washington.edu/people/valentina-staneva/">Valentina Staneva</a> for developing this idea and supporting our project. Thanks to Dr. Staneva for providing valuable feedback on an early implementation. We added the top echogram of the overall dataset, the select all button, the clear all button, and additional explanatory text in response to Dr. Staneva's feedback.
+    </p>
+    <br>
+    <p>Project implemented by <a href='mailto:wxrsz@uw.edu'>Xinran Wang</a>, <a href='mailto:juntaoz@uw.edu'>Eason Zhang</a>, <a href='mailto:rzhong98@uw.edu'>Ruican Zhong</a>, and <a href='mailto:jannetty@uw.edu'>Sophia Jannetty</a>.</p>
+   </div>
+
+
+
+</main>
 </body>
 
 
 
 <script>
 
-  // set the dimensions and margins of the graph
-  const margin = { top: 30, right: 30, bottom: 50, left: 60 },
-    width = 600 - margin.left - margin.right,
-    height = 450 - margin.top - margin.bottom;
+  var current_freq = 0;
 
+  const margin = { top: 50, right: 50, bottom: 50, left: 60 },
+  width = 600 - margin.left - margin.right,
+  height = 450 - margin.top - margin.bottom;
 
-
-
-  const frequency = [38000, 120000, 200000]
-
-  const depth_levels = new Array(37);
-  for (let i = 0; i < depth_levels.length; i++) {
-    depth_levels[i] = i;
-  }
-
-
-  const frequency_depth = new Array(111);
-  for (let i = 0; i < frequency_depth.length; i++) {
-    frequency_depth[i] = i;
-  }
-
-  const ping_time = new Array(144);
-  for (let i = 0; i < ping_time.length; i++) {
-    //ping_time[i] = 1 / 6 * i;
-    ping_time[i] = i;
-
-  }
-
-
+  const frequency = [38000]
+  const depth_levels = 37
+  const frequency_depth = 37;
+  const ping_time = 144;
 
   const n_observation = 62;
-  const p_component_size = frequency.length * depth_levels.length * ping_time.length;
-  const frequency_depth_size = frequency.length * depth_levels.length;
+  const p_component_size = frequency.length * depth_levels * ping_time;
+  const frequency_depth_size = frequency.length * depth_levels;
+  const date_ping_size = n_observation * ping_time;
 
-  // Create svg in page
-  const svg = d3.select("#heatmap")
-    .append("svg")
-    .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom)
-    .append("g")
-    .attr("transform", `translate(${margin.left},${margin.top})`);
+  var hz_selected_pca = [];
+  var whole_pca = []
+  for (let i = 0; i < n_observation; i++) {
+    whole_pca.push(i);
+  }
 
-  // Build X scales, axis, ticks, and labels:
-  const x = d3.scaleBand()
-    .range([0, width])
-    .domain(ping_time)
-    .padding(0.01);
+  async function initialize38() {
+    if (current_freq != 38){
+      current_freq = 38;
+      hz_dataset = "hz38_W_PCA_data.txt";
+      hz_sing_val_file = "hz38_PCA_singular_values.csv";
+      hz_ds_rpca_data = "hz_38_ds_rpca.txt"
+      hz_heatmap_lowrank = true;
+      ds_rpca_plot(hz_ds_rpca_data,ds_rpca_svg, true)
+      heatmap(hz_dataset, hz_sing_val_file, hz_selected_pca, hz_heatmapsvg, hz_heatmap_lowrank, true);
+      heatmap(hz_dataset, hz_sing_val_file, hz_selected_pca, hz_heatmapsvg2, hz_heatmap_lowrank, false);
+      hz_variance_datafile_name = "hz38_explained_variance_data.csv";
+      make_variance_chart(hz_variance_datafile_name, hz_dataset, hz_sing_val_file, hz_selected_pca, hz_varchart, hz_heatmapsvg,hz_heatmapsvg2, hz_heatmap_lowrank, whole_pca);
+     }
+    }
 
-  var xtickValues = x
-    .domain()
-    .filter(function (d, i) { return !((i + 1) % Math.floor(x.domain().length / 10)); });
+    async function initialize120() {
+    if (current_freq != 120){
+      current_freq = 120;
+      hz_dataset = "hz120_W_PCA_data.txt";
+      hz_sing_val_file = "hz120_PCA_singular_values.csv";
+      hz_ds_rpca_data = "hz_120_ds_rpca.txt"
+      hz_heatmap_lowrank = true;
+      ds_rpca_plot(hz_ds_rpca_data,ds_rpca_svg, true)
+      heatmap(hz_dataset, hz_sing_val_file, hz_selected_pca, hz_heatmapsvg, hz_heatmap_lowrank, true);
+      heatmap(hz_dataset, hz_sing_val_file, hz_selected_pca, hz_heatmapsvg2, hz_heatmap_lowrank, false);
+      hz_variance_datafile_name = "hz120_explained_variance_data.csv";
+      await make_variance_chart(hz_variance_datafile_name, hz_dataset, hz_sing_val_file, hz_selected_pca, hz_varchart, hz_heatmapsvg,hz_heatmapsvg2, hz_heatmap_lowrank, whole_pca);
+     }
+    }
 
-  svg.append("g")
-    .attr("transform", `translate(0, ${height})`)
-    .call(d3.axisBottom(x).tickValues(xtickValues))
-
-  svg.append("text")
-    .attr("class", "x label")
-    .attr("text-anchor", "end")
-    .attr("x", width)
-    .attr("y", height + 30)
-    .text("Ping time");
-
-  
-  // Build Y scales, axis, ticks, and labels:
-  const y = d3.scaleBand()
-    .range([0, height])
-    .domain(frequency_depth)
-    .padding(0.01);
-
-  var ytickValues = y
-    .domain()
-    // TODO: y-tick might need change
-    .filter(function (d, i) { return !((i + 1) % Math.floor(y.domain().length / 10)); });
-
-  svg.append("g")
-    .call(d3.axisLeft(y).tickValues(ytickValues));
-
-  svg.append("text")
-    .attr("class", "y label")
-    .attr("text-anchor", "start")
-    .attr("y", -50)
-    .attr("x", -150)
-    .attr("dy", ".75em")
-    .attr("font-size", 20)
-    .attr("transform", "rotate(-90)")
-    .text("depth*frequency");
-
+    async function initialize200() {
+    if (current_freq != 200){
+      current_freq = 200;
+      hz_dataset = "hz200_W_PCA_data.txt";
+      hz_sing_val_file = "hz200_PCA_singular_values.csv";
+      hz_ds_rpca_data = "hz_200_ds_rpca.txt"
+      hz_heatmap_lowrank = true;
+      ds_rpca_plot(hz_ds_rpca_data,ds_rpca_svg, true)
+      heatmap(hz_dataset, hz_sing_val_file, hz_selected_pca, hz_heatmapsvg, hz_heatmap_lowrank, true);
+      heatmap(hz_dataset, hz_sing_val_file, hz_selected_pca, hz_heatmapsvg2, hz_heatmap_lowrank, false);
+      hz_variance_datafile_name = "hz200_explained_variance_data.csv";
+      make_variance_chart(hz_variance_datafile_name, hz_dataset, hz_sing_val_file, hz_selected_pca, hz_varchart, hz_heatmapsvg,hz_heatmapsvg2, hz_heatmap_lowrank, whole_pca);
+     }
+    }
 
 
   // Build color scale
   const myColor = d3.scaleLinear()
     .range(["blue", "red"])
-    //.domain([-4.18e-01,5.81e-01])
-    .domain([-0.02, 0.02])
+    .domain([-60, 60])
+
+  // Color scale for large plot
+  const myColor_date_plot = d3.scaleSequential(d3.interpolateMagma)
+  .domain([-80, -50])
+
+  const ds_rpca_svg = d3.select("#ds-rpca")
+  .append("svg")
+  .attr("width",  600 + width + margin.left + margin.right)
+  .attr("height", -200 + height + margin.top + margin.bottom)
+  .append("g")
+  .attr("transform", `translate(${margin.left},${margin.top})`);
 
 
+  const hz_heatmapsvg = d3.select("#heatmap")
+  .append("svg")
+  .attr("width", width + margin.left + margin.right)
+  .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+  .attr("transform", `translate(${margin.left},${margin.top})`);
 
-  // plot data from csv (Using d3.text() to handle no header data)
-  // currently, only one component was shown in the heatmap.
-  //TODO: User should be able to select one or more components
-  d3.text("../data/W_PCA_data.csv")
-    .then(function (data) {
-      return data.split(",");
-    })
-    .then(function (data) {
-      // split data into 3d Array [62[111 [144]]]
-      const three_dim_array = new Array(62);
-      for (let i = 0, j = 0; i < data.length; i += p_component_size, j += 1) {
-        const chunk = new Array(frequency_depth_size);
-        const intermediate = data.slice(i, i + p_component_size);
-        for (let k = 0, l = 0; k < intermediate.length; k += ping_time.length, l += 1) {
-          chunk[l] = intermediate.slice(k, k + ping_time.length);
-        }
-        three_dim_array[j] = chunk;
-      }
-      // return the first principal component
-      return three_dim_array[0];
-    })
-    .then(function (data) {
-      // plot each column of data
-      for (let index = 0; index < data.length; index++) {
-        plot_column(data[index], index)
-      }
-    });
 
-  // plot of the explained variance
-  
-  function plot_column(data, col_num) {
-    svg.selectAll()
-      .data(data)
-      .enter()
-      .append("rect")
-      .attr("x", function (d, i, j) { return x(i) })
-      .attr("y", function (d, i, j) { return y(col_num) })
-      .attr("width", x.bandwidth())
-      .attr("height", y.bandwidth())
-      .style("fill", function (d, i, j) { return myColor(d) })
-  }
+  const hz_heatmapsvg2 =  d3.select("#heatmap")
+  .append("svg")
+  .attr("width", width + margin.left + margin.right)
+  .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+  .attr("transform", `translate(${margin.left},${margin.top})`);
 
-  // Adding the second plot: explained variance
-  var chart2 = d3.select("body")
-	.append("svg")
+
+  // Adding explained variance plot
+  const hz_varchart = d3.select("#variance_chart")
+	  .append("svg")
 		.attr("width", width + margin.left + margin.right)
 		.attr("height", height + margin.top + margin.bottom)
-	.append("g")
+	  .append("g")
 		.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-    
-  d3.csv("../data/explained_variance_data_x.csv")
-    .then(function (data) {
-      data.forEach(function(d) {
-      d.num = parseInt(d.num);
-      d.variance = parseFloat(d.variance)});
-      
-      // Set x and y axis
-      var	var_x = d3.scaleLinear().domain([0, d3.max(data, function(d) { return d.num; })]).range([0, width]);
-      var	var_y = d3.scaleLinear().domain([0, d3.max(data, function(d) { return d.variance; })]).range([height, 0]);
-      
-      chart2.append("g")
-      .attr("transform", "translate(0," + height + ")")
-      .call(d3.axisBottom(var_x));
+  initialize38();
 
-      chart2.append("g")
-      .call(d3.axisLeft(var_y));
-     // Add dots
-      chart2.append('g')
-        .selectAll("dot")
-        .data(data)
-        .enter()
-        .append("circle")
-          .attr("cx", function (d) { return var_x(d.num); } )
-          .attr("cy", function (d) { return var_y(d.variance); } )
-          .attr("r", 3.5)
-          .style("fill", "#69b3a2")
 
-      chart2.append("text")
-        .attr("class", "y label")
-        .attr("text-anchor", "start")
-        .attr("y", -50)
-        .attr("x", -150)
-        .attr("dy", ".75em")
-        .attr("font-size", 15)
-        .attr("transform", "rotate(-90)")
-        .text("% Variance Explained");
+  // Function for select all pca
+  const selectall_button = document.querySelector("button");
+  selectall_button.addEventListener("click", async function() {
+    const range = (start, end, length = end - start + 1) =>
+    Array.from({ length }, (_, i) => start + i)
+    hz_selected_pca = range(0,61);
+    let rest_pca = []
+    clear_svg();
+    //clear_var_plot();
+    let hz_dataset = "hz38_W_PCA_data.txt";
+    let hz_sing_val_file = "hz38_PCA_singular_values.csv";
+    let hz_ds_rpca_data = "hz_38_ds_rpca.txt"
+    let hz_heatmap_lowrank = true;
+    let new_freq =  parseInt(document.querySelector('.freq_dropdown').value)
 
-      chart2.append("text")
-          .attr("class", "x label")
-          .attr("text-anchor", "end")
-          .attr("x", width)
-          .attr("y", height + 40)
-          .attr("font-size", 15)
-          .text("Component Number");
-        
-    });
+    if (new_freq == 38){
+      hz_dataset = "hz38_W_PCA_data.txt";
+      hz_sing_val_file = "hz38_PCA_singular_values.csv";
+      hz_ds_rpca_data = "hz_38_ds_rpca.txt"
+    } else if (new_freq == 120){
+        hz_dataset = "hz120_W_PCA_data.txt";
+        hz_sing_val_file = "hz120_PCA_singular_values.csv";
+        hz_ds_rpca_data = "hz_120_ds_rpca.txt"
+      } else if (new_freq == 200){
+        hz_dataset = "hz200_W_PCA_data.txt";
+        hz_sing_val_file = "hz200_PCA_singular_values.csv";
+        hz_ds_rpca_data = "hz_200_ds_rpca.txt"
+      }
+    await heatmap(hz_dataset, hz_sing_val_file, hz_selected_pca, hz_heatmapsvg, hz_heatmap_lowrank, true);
+    await heatmap(hz_dataset, hz_sing_val_file, rest_pca, hz_heatmapsvg2, hz_heatmap_lowrank, false);
+    document.querySelector('.year').innerHTML ="100%"
+    hz_varchart.selectAll("circle")
+            .style("fill", "rgb(254, 211, 72)")
+            .attr("class","selected");
+
+    document.querySelector("#heatmap .xlabel").innerHTML = "All the Principal Components are Selected";
+    document.querySelectorAll("#heatmap svg .xlabel")[1].innerHTML = "All the Principal Components are Selected"
+  });
+
+  const selectElement = document.querySelector('.freq_dropdown');
+  selectElement.addEventListener('change', (event) => {
+  const result = document.querySelector('.result');
+  new_freq = event.target.value;
+  if (new_freq == 38){
+    clear_all();
+    initialize38();
+  } else if (new_freq == 120){
+    clear_all();
+    initialize120();
+  } else if (new_freq == 200){
+    clear_all();
+    initialize200();
+  }
+  });
+
+
+
+  clear_ds_plot = function() {
+    ds_rpca_svg.selectAll("rect")
+            .remove();
+    ds_rpca_svg.selectAll("text")
+            .remove();
+    ds_rpca_svg.selectAll("g")
+            .remove();
+  }
+
+  clear_var_plot = function() {
+  // clear points in varchart
+    hz_varchart.selectAll("circle")
+    .remove();
+    hz_varchart.selectAll("text")
+    .remove();
+    hz_varchart.selectAll("g")
+      .remove();
+  }
+
+  clear_svg = function(){
+    // clear heatmaps
+    hz_heatmapsvg.selectAll("rect")
+            .remove();
+    hz_heatmapsvg2.selectAll("rect")
+            .remove();
+
+    // clear text
+    hz_heatmapsvg.selectAll("text")
+            .remove();
+    hz_heatmapsvg2.selectAll("text")
+            .remove();
+
+    // clear axes
+    hz_heatmapsvg.selectAll("g")
+            .remove();
+    hz_heatmapsvg2.selectAll("g")
+            .remove();
+  }
+
+  clear_all = function() {
+    hz_selected_pca = []
+    clear_ds_plot();
+    clear_svg();
+    clear_var_plot();
+  }
+
+  const clearall_button = document.querySelectorAll("button")[1];
+  clearall_button.addEventListener("click", function(){
+    // replace all the selected dots with original color green
+    hz_varchart.selectAll("circle")
+            .style("fill", "rgb(105, 179, 162)")
+            .attr("class","");
+    // clear svg
+    hz_heatmapsvg.selectAll("rect")
+            .remove();
+    hz_heatmapsvg2.selectAll("rect")
+            .remove();
+
+    // clear heat_map
+    hz_heatmapsvg.select(".scale_bar").remove();
+    hz_heatmapsvg2.select(".scale_bar").remove();
+
+
+
+    // let explained variance percentage equatl to zero
+    document.querySelector('.year').innerHTML ="0%";
+
+    // redefine x label 
+    document.querySelector("#heatmap .xlabel").innerHTML = "No Principal Components are Selected";
+    document.querySelectorAll("#heatmap svg .xlabel")[1].innerHTML = "No Principal Components are Selected";
+  });
 
 </script>
 

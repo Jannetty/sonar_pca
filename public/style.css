@@ -9,7 +9,7 @@ main {
   padding: 32px;
 }
 p {
-  max-width: 800px;
+  max-width: 1200px;
 }
 h1 {
   color: #492a7c;
@@ -20,7 +20,32 @@ h2 {
   margin: 32px 0 16px;
   width: fit-content;
 }
+
 footer {
   padding-top: 16px;
   text-align: right;
+}
+
+#container {
+  display: flex;
+  flex-direction: column;
+  flex: center;
+}
+
+
+#all_selection_options{
+  width: 50%;
+}
+
+
+#variance_chart {
+  width: 50%;
+}
+#top-row{
+  display:flex;
+
+  flex-direction:row;
+}
+#whole-setup {
+  margin: 40px 40px 40px 40px;
 }
