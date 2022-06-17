@@ -1,6 +1,6 @@
 # A tool for building intuition about principal component analysis
 
-Group Members: Xinran Wang, Eason Zhang, Ruican Zhong, and Sophia Jannetty
+Group Members: [Xinran Wang](https://github.com/Caroline12138), [Eason Zhang](https://github.com/Ooooe), [Ruican Zhong](https://github.com/RachelZhong98), and [Sophia Jannetty](https://github.com/Jannetty)
 
 This repo is deployed at: https://cse512-22sp.pages.cs.washington.edu/Sonar-Principal-Components/
 
