@@ -179,21 +179,22 @@ async function plot_heatmap_y_axis_and_title (heatmapsvg, xlabel, selected_varia
     .text("depth (meters)");
     if (xlabel === true) {
       if (selected_variance == null) {
-        title_string = "Low Rank Approximations Using Selected Principal Components (0%)";
+        title_string = "Low Rank Approximation Using Selected Principal Components (0%)";
       } else{
-        title_string = "Low Rank Approximations Using Selected Principal Components (" + (selected_variance*100).toFixed(2) + "%)";
+        title_string = "Low Rank Approximation Using Selected Principal Components (" + (selected_variance*100).toFixed(2) + "%)";
       }
       
     } else {
       if (selected_variance == null) {
-        title_string = "Heatmap Using Unselected Principal Components (0%)";
+        title_string = "Low Rank Approximation Using Unselected Principal Components";
       } else{
-        title_string = "Heatmap Using Unselected Principal Components (" + (100 - selected_variance*100).toFixed(2) + "%)";
+        title_string = "Low Rank Approximation Using Unselected Principal Components (" + (100 - selected_variance*100).toFixed(2) + "%)";
       }
       
     }
     //title
     heatmapsvg.append("text")
+    .attr("class", "heat_map_title")
     .attr("x", (width / 2))
     .attr("y", 0 - (margin.top / 2))
     .attr("text-anchor", "middle")

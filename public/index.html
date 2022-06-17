@@ -245,6 +245,26 @@
 
     document.querySelector("#heatmap .xlabel").innerHTML = "All the Principal Components are Selected";
     document.querySelectorAll("#heatmap svg .xlabel")[1].innerHTML = "All the Principal Components are Selected"
+
+    d3.selectAll(".heat_map_title").remove();
+    hz_heatmapsvg.append("text")
+    .attr("class", "heat_map_title")
+    .attr("x", (width / 2))
+    .attr("y", 0 - (margin.top / 2))
+    .attr("text-anchor", "middle")
+    .style("font-size", 12)
+    .attr("font-weight",600)
+    .text("Low Rank Approximation Using Selected Principal Components (100%)");
+
+    hz_heatmapsvg2.append("text")
+    .attr("class", "heat_map_title")
+    .attr("x", (width / 2))
+    .attr("y", 0 - (margin.top / 2))
+    .attr("text-anchor", "middle")
+    .style("font-size", 12)
+    .attr("font-weight",600)
+    .text("Low Rank Approximation Using Unselected Principal Components");
+
   });
 
   const selectElement = document.querySelector('.freq_dropdown');
@@ -335,6 +355,26 @@
     // redefine x label 
     document.querySelector("#heatmap .xlabel").innerHTML = "No Principal Components are Selected";
     document.querySelectorAll("#heatmap svg .xlabel")[1].innerHTML = "No Principal Components are Selected";
+
+    d3.selectAll(".heat_map_title").remove();
+    hz_heatmapsvg.append("text")
+    .attr("class", "heat_map_title")
+    .attr("x", (width / 2))
+    .attr("y", 0 - (margin.top / 2))
+    .attr("text-anchor", "middle")
+    .style("font-size", 12)
+    .attr("font-weight",600)
+    .text("Low Rank Approximation Using Selected Principal Components (0%)");
+
+    hz_heatmapsvg2.append("text")
+    .attr("class", "heat_map_title")
+    .attr("x", (width / 2))
+    .attr("y", 0 - (margin.top / 2))
+    .attr("text-anchor", "middle")
+    .style("font-size", 12)
+    .attr("font-weight",600)
+    .text("Low Rank Approximation Using Unselected Principal Components");
+
   });
 
 </script>
