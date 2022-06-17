@@ -45,4 +45,4 @@ Lee, Wu-Jung, and Valentina Staneva. 2020. “Compact Representation of Temporal
 
 
 ## Group member contributions
-All group members worked on all parts of implementation. Ruican spent more time working on the scatter plot, Eason spent more time working on the echograms, Xinran spent more time working on the interactions, and Sophia spent more time working on the back-end calculations. However all members have contributed to all components of the project.
+All group members worked on all parts of implementation. Ruican spent more time working on the scatter plot, Eason spent more time working on the echograms, Xinran spent more time working on the interactions, and Sophia spent more time working on the back-end calculations. However all members have contributed to all components of the project. Each groupmember spent ~20 hours working on this project.
