@@ -1,0 +1,3 @@
+# removing jupyter notebook from project breakdown by setting it to
+# documemtation (https://github.com/github/linguist/blob/master/docs/overrides.md)
+*.ipynb linguist-documentation
